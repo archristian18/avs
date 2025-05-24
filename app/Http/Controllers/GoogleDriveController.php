@@ -9,8 +9,10 @@ class GoogleDriveController extends Controller
 {
     public function upload()
     {
-        Storage::disk('google')->put('example.txt', 'This file is stored in Google Drive.');
-        return 'Uploaded to Google Drive!';
+        $content = 'Hello from Laravel to Google Drive!';
+        Storage::disk('google')->put('test_laravel_drive.txt', $content);
+
+        return 'File uploaded successfully!';
     }
 
     public function listFiles()
@@ -21,7 +23,14 @@ class GoogleDriveController extends Controller
 
     public function download($filename)
     {
-        $content = Storage::disk('google')->get($filename);
-        return response($content)->header('Content-Type', 'text/plain');
+        if (!Storage::disk('google')->exists($filename)) {
+            return response('File not found', 404);
+        }
+
+        $fileContent = Storage::disk('google')->get($filename);
+        $mime = Storage::disk('google')->mimeType($filename);
+
+        return response($fileContent)
+            ->header('Content-Type', $mime);
     }
 }
